@@ -1,92 +1,76 @@
 #include<bits/stdc++.h>
 using namespace std;
-int precedence(char a)
+int solve(int a, int b, char op)
 {
-    if(a == '*' || a == '/')
-        return 2;
-    else
-        return 1;
+    if(op == '*') return a*b;
+    if(op == '/') return a/b;
+    if(op == '+') return a+b;
+    else return a-b;
 }
 
-int operation(int a, int b, char op)
+int precedence(char op)
 {
-    if(op == '+')
-        return a+b;
-    else if(op == '-')
-        return a-b;
-    else if(op == '*')
-        return a*b;
-    else
-        return a/b;
+    if(op == '*' || op == '/') return 2;
+    else return 1;
 }
 
-long long int infixEvaluation(string str)
+int infixEval(string str)
 {
-    stack<long long int> oprand;
-    stack<char> oprtor;
-    for(int i=0; i<str.size(); i++)
+    stack<int> opand;
+    stack<char> optor;
+
+    for(auto it : str)
     {
-        if(str[i] == ' ')
-            continue;
-            
-        else if(str[i] == '(')
-            oprtor.push(str[i]);
-            
-        else if(isdigit(str[i]))
-            oprand.push(str[i]-'0');
-            
-        else if(str[i]=='*' || str[i]=='/' || str[i]=='+' || str[i]=='-')
+        if(it == '(')
+            optor.push(it);
+
+        else if(isdigit(it))
+            opand.push(it-'0');
+
+        else if(it == '*' || it == '/' || it == '+' || it == '-')
         {
-            while(!oprtor.empty() && oprtor.top()!='(' && (precedence(str[i]) <= precedence(oprtor.top())))
+            while(!optor.empty() && optor.top() != '(' && (precedence(it) <= precedence(optor.top())))
             {
-                int b = oprand.top();
-                oprand.pop();
-                int a = oprand.top();
-                oprand.pop();
-                char op = oprtor.top();
-                oprtor.pop();
-                
-                int temp = operation(a,b,op);
-                oprand.push(temp);
+                int b = opand.top(); opand.pop();
+                int a = opand.top(); opand.pop();
+                char op = optor.top(); optor.pop();
+
+                int temp = solve(a,b,op);
+                opand.push(temp);
             }
-            oprtor.push(str[i]);
+            optor.push(it);
         }
-        else if(str[i] == ')')
+
+        else if(it == ')')
         {
-            while(!oprtor.empty() && oprtor.top() != '(')
+            while(!optor.empty() && optor.top() != '(')
             {
-                int b = oprand.top();
-                oprand.pop();
-                int a = oprand.top();
-                oprand.pop();
-                char op = oprtor.top();
-                oprtor.pop();
-                
-                int temp = operation(a,b,op);
-                oprand.push(temp);
+                int b = opand.top(); opand.pop();
+                int a = opand.top(); opand.pop();
+                char op = optor.top(); optor.pop();
+
+                int temp = solve(a,b,op);
+                opand.push(temp);
             }
-            oprtor.pop();
+            optor.pop();
         }
     }
-    
-    while(!oprtor.empty())
+
+    while(!optor.empty())
     {
-        int b = oprand.top();
-        oprand.pop();
-        int a = oprand.top();
-        oprand.pop();
-        char op = oprtor.top();
-        oprtor.pop();
-                
-        int temp = operation(a,b,op);
-        oprand.push(temp);
+        int b = opand.top(); opand.pop();
+        int a = opand.top(); opand.pop();
+        char op = optor.top(); optor.pop();
+
+        int temp = solve(a,b,op);
+        opand.push(temp);
     }
-    
-    return oprand.top();
+
+    return opand.top();
 }
 
 int main()
 {
-    string str = "3 / (6 * 8 - 4) + 9";
-    cout<<infixEvaluation(str);
+    string str = "2+(5-3*6/7)";
+    cout<<infixEval(str);
 }
